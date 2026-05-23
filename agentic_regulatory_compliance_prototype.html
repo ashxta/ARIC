@@ -1,0 +1,450 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"/>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#0a0e17;--bg2:#111827;--bg3:#1a2235;--bg4:#1e2a40;
+    --border:#2a3a55;--border2:#3a4f72;
+    --teal:#00d4aa;--teal2:#00a887;--teal-dim:rgba(0,212,170,0.12);
+    --blue:#3b8fe8;--blue-dim:rgba(59,143,232,0.12);
+    --amber:#f59e0b;--amber-dim:rgba(245,158,11,0.12);
+    --red:#ef4444;--red-dim:rgba(239,68,68,0.12);
+    --green:#22c55e;--green-dim:rgba(34,197,94,0.12);
+    --purple:#a78bfa;--purple-dim:rgba(167,139,250,0.12);
+    --text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;
+    --radius:8px;--radius2:12px;
+  }
+  body{background:var(--bg);color:var(--text);font-family:"Courier New",monospace;font-size:13px;min-height:100vh}
+  .app{display:flex;flex-direction:column;min-height:100vh}
+  .topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;gap:12px}
+  .logo{font-size:17px;font-weight:700;color:var(--teal);letter-spacing:1px}
+  .logo span{color:var(--text2);font-weight:400;font-size:12px;margin-left:6px}
+  .badge-live{background:var(--teal-dim);color:var(--teal);border:1px solid var(--teal2);font-size:10px;padding:2px 8px;border-radius:20px;letter-spacing:1px;animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+  .tabs{display:flex;gap:1px;background:var(--bg);border-bottom:1px solid var(--border);overflow-x:auto}
+  .tab{padding:10px 18px;cursor:pointer;color:var(--text3);font-size:12px;letter-spacing:.5px;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s}
+  .tab.active{color:var(--teal);border-bottom-color:var(--teal);background:var(--bg2)}
+  .tab:hover:not(.active){color:var(--text2);background:var(--bg3)}
+  .main{display:flex;flex:1;gap:0}
+  .panel{flex:1;overflow-y:auto;padding:16px}
+  .divider{width:1px;background:var(--border)}
+  .panel-title{font-size:11px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+  .panel-title::after{content:"";flex:1;height:1px;background:var(--border)}
+  .reg-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:12px;margin-bottom:8px;cursor:pointer;transition:all .18s;position:relative;overflow:hidden}
+  .reg-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--blue)}
+  .reg-card:hover{border-color:var(--border2);background:var(--bg4)}
+  .reg-card.selected{border-color:var(--teal);background:var(--bg4)}
+  .reg-card.selected::before{background:var(--teal)}
+  .reg-card.high::before{background:var(--red)}
+  .reg-card.med::before{background:var(--amber)}
+  .reg-meta{display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap}
+  .tag{font-size:10px;padding:2px 7px;border-radius:20px;letter-spacing:.5px}
+  .tag.rbi{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(59,143,232,.3)}
+  .tag.sebi{background:var(--purple-dim);color:var(--purple);border:1px solid rgba(167,139,250,.3)}
+  .tag.irdai{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(245,158,11,.3)}
+  .tag.fatf{background:var(--teal-dim);color:var(--teal);border:1px solid rgba(0,212,170,.3)}
+  .tag.high{background:var(--red-dim);color:var(--red);border:1px solid rgba(239,68,68,.3)}
+  .tag.med{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(245,158,11,.3)}
+  .tag.low{background:var(--green-dim);color:var(--green);border:1px solid rgba(34,197,94,.3)}
+  .reg-title{font-size:12px;color:var(--text);font-weight:600;margin-bottom:3px;line-height:1.4}
+  .reg-sub{font-size:11px;color:var(--text2);line-height:1.4}
+  .reg-date{font-size:10px;color:var(--text3);margin-top:4px}
+  .right-panel{width:340px;flex-shrink:0;border-left:1px solid var(--border);display:flex;flex-direction:column}
+  .ai-header{padding:12px 14px;background:var(--bg2);border-bottom:1px solid var(--border)}
+  .ai-title{font-size:11px;color:var(--teal);letter-spacing:1.5px;text-transform:uppercase}
+  .ai-sub{font-size:10px;color:var(--text3);margin-top:2px}
+  .ai-body{flex:1;overflow-y:auto;padding:12px}
+  .map-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:11px;margin-bottom:8px;transition:all .2s}
+  .map-card:hover{border-color:var(--border2)}
+  .map-top{display:flex;align-items:flex-start;gap:8px;margin-bottom:8px}
+  .map-num{background:var(--teal-dim);color:var(--teal);border:1px solid var(--teal2);font-size:10px;padding:2px 6px;border-radius:4px;white-space:nowrap;font-weight:700}
+  .map-dept{font-size:10px;padding:2px 7px;border-radius:20px;background:var(--purple-dim);color:var(--purple);border:1px solid rgba(167,139,250,.25);white-space:nowrap}
+  .map-text{font-size:11px;color:var(--text);line-height:1.5;flex:1}
+  .map-bottom{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .map-deadline{font-size:10px;color:var(--text3)}
+  .map-status{margin-left:auto;display:flex;gap:4px}
+  .status-btn{font-size:10px;padding:2px 8px;border-radius:4px;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;transition:all .15s}
+  .status-btn:hover{background:var(--bg4);color:var(--text)}
+  .status-btn.done{background:var(--green-dim);color:var(--green);border-color:rgba(34,197,94,.4)}
+  .status-btn.pending{background:var(--amber-dim);color:var(--amber);border-color:rgba(245,158,11,.3)}
+  .status-btn.validated{background:var(--teal-dim);color:var(--teal);border-color:var(--teal2)}
+  .thinking{display:flex;align-items:center;gap:8px;padding:14px;color:var(--teal);font-size:11px}
+  .dots span{animation:dot .8s infinite}
+  .dots span:nth-child(2){animation-delay:.2s}
+  .dots span:nth-child(3){animation-delay:.4s}
+  @keyframes dot{0%,80%,100%{opacity:.3}40%{opacity:1}}
+  .empty-state{text-align:center;padding:40px 20px;color:var(--text3);font-size:11px;line-height:1.8}
+  .empty-icon{font-size:32px;margin-bottom:10px;opacity:.4}
+  .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:12px 16px;background:var(--bg2);border-bottom:1px solid var(--border)}
+  .stat{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px}
+  .stat-val{font-size:18px;font-weight:700;color:var(--teal)}
+  .stat-lbl{font-size:10px;color:var(--text3);margin-top:2px;letter-spacing:.5px}
+  .validate-bar{padding:10px 14px;background:var(--bg2);border-top:1px solid var(--border);display:flex;gap:8px}
+  .btn{padding:7px 14px;border-radius:var(--radius);border:1px solid;font-size:11px;cursor:pointer;transition:all .18s;letter-spacing:.5px}
+  .btn-primary{background:var(--teal-dim);color:var(--teal);border-color:var(--teal2)}
+  .btn-primary:hover{background:rgba(0,212,170,.25)}
+  .btn-ghost{background:transparent;color:var(--text2);border-color:var(--border2)}
+  .btn-ghost:hover{background:var(--bg4);color:var(--text)}
+  .section-lbl{font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin:10px 0 6px}
+  .dept-chip{display:inline-flex;align-items:center;gap:5px;background:var(--bg4);border:1px solid var(--border2);border-radius:20px;padding:3px 10px;font-size:10px;color:var(--text2);margin:3px 3px 3px 0}
+  .dept-chip .dot{width:6px;height:6px;border-radius:50%;background:var(--teal)}
+  .progress-bar{height:3px;background:var(--border);border-radius:3px;margin:8px 0}
+  .progress-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--teal),var(--blue));transition:width .4s}
+  .agent-log{font-size:10px;color:var(--text3);line-height:1.9;padding:0 0 8px}
+  .agent-log .line{display:flex;gap:6px}
+  .agent-log .ts{color:var(--text3);min-width:54px}
+  .agent-log .msg{color:var(--text2)}
+  .agent-log .msg.ok{color:var(--green)}
+  .agent-log .msg.warn{color:var(--amber)}
+  .agent-log .msg.act{color:var(--teal)}
+  .scroll-fade{position:sticky;bottom:0;height:20px;background:linear-gradient(transparent,var(--bg))}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="logo">ARIC <span>Agentic Regulatory Intelligence & Compliance</span></div>
+    <div style="flex:1"></div>
+    <div class="badge-live">● LIVE</div>
+    <div style="font-size:10px;color:var(--text3)">Canara Bank · SuRaksha 2025</div>
+  </div>
+  <div class="stats-row">
+    <div class="stat"><div class="stat-val" id="s-total">7</div><div class="stat-lbl">REGULATIONS</div></div>
+    <div class="stat"><div class="stat-val" id="s-maps" style="color:var(--blue)">0</div><div class="stat-lbl">MAPS GENERATED</div></div>
+    <div class="stat"><div class="stat-val" id="s-done" style="color:var(--green)">0</div><div class="stat-lbl">VALIDATED</div></div>
+    <div class="stat"><div class="stat-val" id="s-pct" style="color:var(--amber)">0%</div><div class="stat-lbl">COMPLIANCE</div></div>
+  </div>
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('monitor',this)">📡 REGULATORY MONITOR</div>
+    <div class="tab" onclick="switchTab('map',this)">🗺 MAP TRACKER</div>
+    <div class="tab" onclick="switchTab('log',this)">🤖 AGENT LOG</div>
+  </div>
+  <div class="main">
+    <!-- LEFT: Regulatory feed -->
+    <div class="panel" style="max-width:380px;min-width:260px" id="tab-monitor">
+      <div class="panel-title">Incoming Regulations</div>
+      <div id="reg-list"></div>
+    </div>
+    <!-- CENTER: MAPs panel -->
+    <div class="panel" id="tab-map" style="display:none">
+      <div class="panel-title">Measurable Action Points</div>
+      <div id="map-global"></div>
+    </div>
+    <!-- Agent log tab -->
+    <div class="panel" id="tab-log" style="display:none">
+      <div class="panel-title">Agent Activity Log</div>
+      <div class="agent-log" id="agent-log-display"></div>
+    </div>
+    <div class="divider"></div>
+    <!-- RIGHT: AI Panel -->
+    <div class="right-panel">
+      <div class="ai-header">
+        <div class="ai-title">🤖 Agentic Engine</div>
+        <div class="ai-sub" id="ai-sub">Select a regulation to generate MAPs</div>
+      </div>
+      <div class="ai-body" id="ai-body">
+        <div class="empty-state">
+          <div class="empty-icon">⚙️</div>
+          <div>Click any regulation card to trigger the<br>agentic analysis pipeline</div>
+          <br>
+          <div style="color:var(--text3);font-size:10px">The agent will:<br>→ Parse regulatory requirements<br>→ Generate Measurable Action Points<br>→ Assign to departments<br>→ Set deadlines & validate</div>
+        </div>
+      </div>
+      <div class="validate-bar" id="validate-bar" style="display:none">
+        <button class="btn btn-primary" onclick="autoValidate()">⚡ Auto-Validate All</button>
+        <button class="btn btn-ghost" onclick="exportMAPs()">↗ Export MAPs</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const REGS=[
+  {id:1,title:"RBI Master Direction on KYC — Amendment 2025",body:"Updated KYC norms for digital banking, video-based customer identification process (V-CIP), and periodic updation frequencies for different customer categories.",regulator:"rbi",priority:"high",date:"15 Apr 2025",topic:"KYC / AML"},
+  {id:2,title:"FATF Recommendation 16 — Instant Payment Compliance",body:"Wire transfer transparency requirements extended to UPI and IMPS transactions above ₹50,000. Originator and beneficiary data mandatory.",regulator:"fatf",priority:"high",date:"08 Apr 2025",topic:"Payments"},
+  {id:3,title:"RBI Draft Circular — Cloud Outsourcing Framework",body:"Banks to ensure data localisation, right-to-audit clauses, and exit management plans for all cloud service providers handling banking data.",regulator:"rbi",priority:"med",date:"01 Apr 2025",topic:"IT / Cloud"},
+  {id:4,title:"SEBI Circular — BRSR Core Reporting Norms",body:"Listed bank entities must disclose ESG metrics in BRSR Core format from FY 2025-26. Mandatory third-party assurance on 6 key performance indicators.",regulator:"sebi",priority:"med",date:"22 Mar 2025",topic:"ESG Reporting"},
+  {id:5,title:"IRDAI — Bancassurance Product Approval Update",body:"Banks distributing insurance products must renew all bancassurance tie-up agreements and file updated product approval documentation by Q2 FY26.",regulator:"irdai",priority:"low",date:"18 Mar 2025",topic:"Insurance"},
+  {id:6,title:"RBI — Basel III Capital Adequacy Revision (CRAR)",body:"Revised computation methodology for credit risk-weighted assets under Standardised Approach. Applicable from 1 April 2026.",regulator:"rbi",priority:"med",date:"10 Mar 2025",topic:"Capital"},
+  {id:7,title:"FATF Mutual Evaluation — Beneficial Ownership Registers",body:"India's FATF evaluation requires banks to enhance beneficial ownership verification for legal entities, trusts, and complex ownership structures.",regulator:"fatf",priority:"high",date:"03 Mar 2025",topic:"AML / CFT"},
+];
+
+const DEPT_COLORS={
+  "Compliance":["var(--teal)","var(--teal-dim)"],
+  "Risk Management":["var(--red)","var(--red-dim)"],
+  "IT / Technology":["var(--blue)","var(--blue-dim)"],
+  "Operations":["var(--amber)","var(--amber-dim)"],
+  "Legal":["var(--purple)","var(--purple-dim)"],
+  "Finance":["var(--green)","var(--green-dim)"],
+  "HR / Training":["#f472b6","rgba(244,114,182,.12)"],
+  "Audit":["#38bdf8","rgba(56,189,248,.12)"],
+};
+
+let allMAPs={};
+let agentLog=[];
+let selectedReg=null;
+
+function log(msg,type=""){
+  const now=new Date();
+  const ts=now.getHours().toString().padStart(2,"0")+":"+now.getMinutes().toString().padStart(2,"0")+":"+now.getSeconds().toString().padStart(2,"0");
+  agentLog.unshift({ts,msg,type});
+  renderLog();
+}
+
+function renderLog(){
+  const el=document.getElementById("agent-log-display");
+  if(!el)return;
+  el.innerHTML=agentLog.map(l=>`<div class="line"><span class="ts">${l.ts}</span><span class="msg ${l.type}">${l.msg}</span></div>`).join("");
+}
+
+function switchTab(tab,el){
+  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+  el.classList.add("active");
+  ["monitor","map","log"].forEach(t=>{
+    const p=document.getElementById("tab-"+t);
+    if(p)p.style.display=t===tab?"block":"none";
+  });
+}
+
+function renderRegList(){
+  const c=document.getElementById("reg-list");
+  c.innerHTML=REGS.map(r=>`
+    <div class="reg-card ${r.priority}" id="rc-${r.id}" onclick="selectReg(${r.id})">
+      <div class="reg-meta">
+        <span class="tag ${r.regulator}">${r.regulator.toUpperCase()}</span>
+        <span class="tag ${r.priority}">${r.priority.toUpperCase()}</span>
+        <span style="font-size:10px;color:var(--text3);margin-left:auto">${r.topic}</span>
+      </div>
+      <div class="reg-title">${r.title}</div>
+      <div class="reg-sub">${r.body.substring(0,90)}…</div>
+      <div class="reg-date">${r.date} ${allMAPs[r.id]?`· <span style="color:var(--teal)">${allMAPs[r.id].length} MAPs generated</span>`:""}</div>
+    </div>
+  `).join("");
+}
+
+async function selectReg(id){
+  selectedReg=id;
+  document.querySelectorAll(".reg-card").forEach(c=>c.classList.remove("selected"));
+  const rc=document.getElementById("rc-"+id);
+  if(rc)rc.classList.add("selected");
+  
+  const reg=REGS.find(r=>r.id===id);
+  document.getElementById("ai-sub").textContent="Analysing: "+reg.title.substring(0,40)+"…";
+  
+  const aiBody=document.getElementById("ai-body");
+  aiBody.innerHTML=`<div class="thinking">
+    <div class="dots"><span>▪</span><span>▪</span><span>▪</span></div>
+    <span>Agent processing regulation…</span>
+  </div>`;
+  
+  log(`Received regulation: ${reg.title.substring(0,50)}…`,"act");
+  log(`Priority: ${reg.priority.toUpperCase()} | Source: ${reg.regulator.toUpperCase()}`);
+  
+  if(allMAPs[id]){
+    renderMAPs(id);
+    return;
+  }
+  
+  log("Calling Anthropic API for MAP extraction…","act");
+
+  try{
+    const prompt=`You are an AI compliance officer at Canara Bank, India.
+
+A new regulatory directive has been received:
+
+TITLE: ${reg.title}
+REGULATOR: ${reg.regulator.toUpperCase()}
+PRIORITY: ${reg.priority}
+DETAILS: ${reg.body}
+
+Generate exactly 4 Measurable Action Points (MAPs) that the bank must complete to comply.
+
+Respond ONLY with a JSON array. No markdown, no explanation. Format:
+[
+  {
+    "map_id": "MAP-001",
+    "action": "Concise action statement (max 15 words)",
+    "department": "One of: Compliance, Risk Management, IT / Technology, Operations, Legal, Finance, HR / Training, Audit",
+    "deadline": "X weeks",
+    "metric": "How completion is measured (max 12 words)",
+    "priority": "high|med|low"
+  }
+]`;
+
+    const resp=await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        model:"claude-sonnet-4-20250514",
+        max_tokens:1000,
+        messages:[{role:"user",content:prompt}]
+      })
+    });
+    const data=await resp.json();
+    const raw=data.content.map(i=>i.text||"").join("");
+    const clean=raw.replace(/```json|```/g,"").trim();
+    const maps=JSON.parse(clean);
+    allMAPs[id]=maps.map(m=>({...m,status:"pending"}));
+    log(`Generated ${maps.length} MAPs for regulation #${id}`,"ok");
+    maps.forEach(m=>log(`→ ${m.map_id}: assigned to ${m.department}`,""));
+    renderRegList();
+    renderMAPs(id);
+    updateStats();
+  }catch(e){
+    log("API error: "+e.message,"warn");
+    // Fallback mock MAPs
+    allMAPs[id]=[
+      {map_id:"MAP-001",action:"Update internal policy documents to reflect new requirements",department:"Compliance",deadline:"4 weeks",metric:"Policy updated and approved by board",priority:"high",status:"pending"},
+      {map_id:"MAP-002",action:"Conduct staff training on updated regulatory procedures",department:"HR / Training",deadline:"6 weeks",metric:"100% staff completion rate",priority:"med",status:"pending"},
+      {map_id:"MAP-003",action:"Implement technical controls and audit logging",department:"IT / Technology",deadline:"8 weeks",metric:"System audit confirms controls active",priority:"high",status:"pending"},
+      {map_id:"MAP-004",action:"File regulatory acknowledgement and compliance report",department:"Legal",deadline:"2 weeks",metric:"Filed with regulator, receipt obtained",priority:"high",status:"pending"},
+    ];
+    renderRegList();
+    renderMAPs(id);
+    updateStats();
+  }
+}
+
+function renderMAPs(id){
+  const maps=allMAPs[id]||[];
+  const reg=REGS.find(r=>r.id===id);
+  const done=maps.filter(m=>m.status==="validated").length;
+  const pct=Math.round((done/maps.length)*100);
+  
+  document.getElementById("ai-sub").textContent=`${maps.length} MAPs · ${done} validated`;
+  document.getElementById("validate-bar").style.display="flex";
+  
+  const aiBody=document.getElementById("ai-body");
+  aiBody.innerHTML=`
+    <div class="section-lbl">Regulation</div>
+    <div style="font-size:11px;color:var(--text2);line-height:1.5;margin-bottom:10px">${reg.title}</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
+      ${[...new Set(maps.map(m=>m.department))].map(d=>`<div class="dept-chip"><span class="dot" style="background:${(DEPT_COLORS[d]||["var(--teal)"])[0]}"></span>${d}</div>`).join("")}
+    </div>
+    <div class="section-lbl">Progress</div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+      <div class="progress-bar" style="flex:1"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <span style="font-size:11px;color:var(--teal);font-weight:700">${pct}%</span>
+    </div>
+    <div class="section-lbl">Action Points</div>
+    ${maps.map((m,i)=>{
+      const dc=DEPT_COLORS[m.department]||["var(--teal)","var(--teal-dim)"];
+      return`<div class="map-card" id="mc-${id}-${i}">
+        <div class="map-top">
+          <span class="map-num">${m.map_id}</span>
+          <span style="font-size:10px;padding:2px 7px;border-radius:20px;background:${dc[1]};color:${dc[0]};border:1px solid ${dc[0]}33;white-space:nowrap">${m.department}</span>
+        </div>
+        <div class="map-text">${m.action}</div>
+        <div style="font-size:10px;color:var(--text3);margin:4px 0">Metric: ${m.metric}</div>
+        <div class="map-bottom">
+          <span class="map-deadline">⏱ ${m.deadline}</span>
+          <div class="map-status">
+            <button class="status-btn ${m.status==='pending'?'pending':''}" onclick="setStatus(${id},${i},'pending')">Pending</button>
+            <button class="status-btn ${m.status==='done'?'done':''}" onclick="setStatus(${id},${i},'done')">Done</button>
+            <button class="status-btn ${m.status==='validated'?'validated':''}" onclick="setStatus(${id},${i},'validated')">✓ Validated</button>
+          </div>
+        </div>
+      </div>`;
+    }).join("")}
+  `;
+  renderGlobalMAPs();
+  updateStats();
+}
+
+function renderGlobalMAPs(){
+  const c=document.getElementById("map-global");
+  const allEntries=[];
+  Object.keys(allMAPs).forEach(id=>{
+    const reg=REGS.find(r=>r.id==id);
+    allMAPs[id].forEach((m,i)=>allEntries.push({...m,regId:id,idx:i,regTitle:reg.title}));
+  });
+  if(!allEntries.length){
+    c.innerHTML=`<div class="empty-state"><div class="empty-icon">🗺</div><div>No MAPs generated yet.<br>Select a regulation to begin.</div></div>`;
+    return;
+  }
+  const depts=[...new Set(allEntries.map(e=>e.department))].sort();
+  c.innerHTML=depts.map(dept=>{
+    const items=allEntries.filter(e=>e.department===dept);
+    const dc=DEPT_COLORS[dept]||["var(--teal)","var(--teal-dim)"];
+    return`<div style="margin-bottom:16px">
+      <div style="font-size:11px;font-weight:700;color:${dc[0]};margin-bottom:8px;display:flex;align-items:center;gap:6px">
+        <span style="width:8px;height:8px;border-radius:50%;background:${dc[0]};display:inline-block"></span>
+        ${dept} <span style="font-size:10px;color:var(--text3);font-weight:400">(${items.length} action${items.length>1?"s":""})</span>
+      </div>
+      ${items.map(e=>`<div class="map-card" style="margin-bottom:6px">
+        <div style="font-size:10px;color:var(--text3);margin-bottom:4px">${e.regTitle.substring(0,55)}…</div>
+        <div style="font-size:11px;color:var(--text);margin-bottom:4px">${e.action}</div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span class="map-num" style="font-size:9px">${e.map_id}</span>
+          <span style="font-size:10px;color:var(--text3)">⏱ ${e.deadline}</span>
+          <span style="margin-left:auto;font-size:10px;padding:1px 6px;border-radius:4px;background:${e.status==='validated'?'var(--teal-dim)':e.status==='done'?'var(--green-dim)':'var(--amber-dim)'};color:${e.status==='validated'?'var(--teal)':e.status==='done'?'var(--green)':'var(--amber)'}">
+            ${e.status}
+          </span>
+        </div>
+      </div>`).join("")}
+    </div>`;
+  }).join("");
+}
+
+function setStatus(regId,idx,status){
+  if(allMAPs[regId]){
+    const prev=allMAPs[regId][idx].status;
+    allMAPs[regId][idx].status=status;
+    log(`${allMAPs[regId][idx].map_id}: status changed ${prev} → ${status}`,status==='validated'?'ok':status==='done'?'act':'warn');
+    if(selectedReg==regId)renderMAPs(regId);
+    renderGlobalMAPs();
+    updateStats();
+  }
+}
+
+function autoValidate(){
+  if(!selectedReg||!allMAPs[selectedReg])return;
+  log("Auto-validation started by agent…","act");
+  allMAPs[selectedReg].forEach((m,i)=>{
+    setTimeout(()=>{
+      allMAPs[selectedReg][i].status="validated";
+      log(`Auto-validated ${m.map_id} (${m.department})`,"ok");
+      renderMAPs(selectedReg);
+      renderGlobalMAPs();
+      updateStats();
+    },i*500+300);
+  });
+}
+
+function exportMAPs(){
+  if(!selectedReg||!allMAPs[selectedReg])return;
+  const reg=REGS.find(r=>r.id==selectedReg);
+  let txt=`ARIC — Measurable Action Points Export\n${"=".repeat(50)}\n`;
+  txt+=`Regulation: ${reg.title}\nDate: ${new Date().toLocaleDateString()}\n\n`;
+  allMAPs[selectedReg].forEach(m=>{
+    txt+=`${m.map_id} [${m.department}]\nAction: ${m.action}\nMetric: ${m.metric}\nDeadline: ${m.deadline}\nStatus: ${m.status}\n\n`;
+  });
+  const blob=new Blob([txt],{type:"text/plain"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;a.download="ARIC_MAPs.txt";a.click();
+  log("MAPs exported to file","ok");
+}
+
+function updateStats(){
+  let totalMAPs=0,validated=0;
+  Object.values(allMAPs).forEach(maps=>{
+    totalMAPs+=maps.length;
+    validated+=maps.filter(m=>m.status==="validated").length;
+  });
+  document.getElementById("s-maps").textContent=totalMAPs;
+  document.getElementById("s-done").textContent=validated;
+  document.getElementById("s-pct").textContent=totalMAPs?Math.round((validated/totalMAPs)*100)+"%":"0%";
+}
+
+// Init
+log("ARIC system initialized","ok");
+log("Monitoring 7 regulatory streams","act");
+log("Anthropic API endpoint ready","ok");
+renderRegList();
+</script>
+</body>
+</html>
